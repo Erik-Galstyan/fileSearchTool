@@ -154,12 +154,12 @@ void *thread_func(void *arg) {
     Threads threadObj = *(Threads *)arg;
     int start = threadObj.start;
     int end = start + threadObj.howMuch;
-    printf("min = %lld max = %lld\n",min,max);
+    printf("min = %lld max = %lld\n", min, max);
     for (int i = start; i < end; i++) {
         DIR *dir;
         struct dirent *entry;
         struct stat statbuf;
-        // printf(" openi diry: %s\n",Dir_array[i]);
+
         dir = opendir(Dir_array[i]);
         if (dir == NULL) {
             perror("opendir");
@@ -169,13 +169,17 @@ void *thread_func(void *arg) {
         char command[2048] = {0};
 
         while ((entry = readdir(dir)) != NULL) {
+            char full_path[2048];
+            snprintf(full_path, sizeof(full_path), "%s/%s", Dir_array[i], entry->d_name);
 
-            struct stat st;
-            stat(entry->d_name,&st);
+            if (stat(full_path, &statbuf) == -1) {
+                perror("stat");
+                continue;
+            }
 
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-            continue;
-        }
+            if (S_ISDIR(statbuf.st_mode)) {
+                continue;
+            }
 
             int size = strlen(entry->d_name);
             int patternSize = strlen(pattern);
@@ -185,24 +189,20 @@ void *thread_func(void *arg) {
                 continue;
             }
 
-            //  printf("pattern = %s entryname = %s\n",pattern,entry->d_name);
-            for (int j = 0, k = size - patternSize; j < patternSize; j++,k++) {
-                 printf("pattern element = %c entryn element = %c\n",pattern[j],entry->d_name[k]);
+            for (int j = 0, k = size - patternSize; j < patternSize; j++, k++) {
                 if (entry->d_name[k] != pattern[j]) {
                     Wrongflag = 1;
                     break;
                 }
             }
 
-            // printf("elac = %s stat size =%ld\n",entry->d_name,st.st_sizje);
-            // printf("%s size = %ld\n",entry->d_name,st.st_size);
-            if (Wrongflag || st.st_size < min || st.st_size > max ) {
-              Wrongflag = 0; 
-              continue;
+            if (Wrongflag || statbuf.st_size < min || statbuf.st_size > max) {
+                continue;
             }
-        
-            snprintf(command, sizeof(command), "ls -lh %s/%s >> res.txt", Dir_array[i], entry->d_name);
+
+            snprintf(command, sizeof(command), "ls -lh %s >> res.txt", full_path);
             system(command);
+
             pthread_mutex_lock(&mutex);
             count_of_missing_file++;
             pthread_mutex_unlock(&mutex);
@@ -215,7 +215,6 @@ void *thread_func(void *arg) {
 
     return NULL;
 }
-
 int main(int argc, char *argv[]) {
 
     signal(SIGINT,handler);    
