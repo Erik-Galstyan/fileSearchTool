@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
         }
     }
     char last_command[1024] = {0};
-    snprintf(last_command,sizeof(last_command),"echo Count of matching files in %d directories: %d >> res.txt",Size,count_of_missing_file);
+    snprintf(last_command,sizeof(last_command),"echo The count of matching files ending in %s in %d directories: %d >> res.txt",argv[4],Size,count_of_missing_file);
     system(last_command);
 
     for (int i = 0; i < Size; i++) {
