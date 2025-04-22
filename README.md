@@ -23,13 +23,13 @@ You can obtain the program in one of three ways:
 ### Clone via HTTPS
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/Erik-Galstyan/your-repo-name.git
 ```
 
 ### Clone via SSH
 
 ```bash
-git clone git@github.com:your-username/your-repo-name.git
+git clone git@github.com:Erik-Galstyan/your-repo-name.git
 ```
 ### Download as ZIP
 
